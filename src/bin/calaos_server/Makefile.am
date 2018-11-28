@@ -27,6 +27,7 @@ AM_CPPFLAGS =                                                 \
         -I$(top_srcdir)/src/bin/calaos_server/IO/xPL          \
         -I$(top_srcdir)/src/bin/calaos_server/IO/xPL/xPLLib   \
         -I$(top_srcdir)/src/bin/calaos_server/IO/Zibase       \
+        -I$(top_srcdir)/src/bin/calaos_server/IO/Zigbee       \
         -I$(top_srcdir)/src/bin/calaos_server/IO              \
         -I$(top_srcdir)/src/bin/calaos_server/IPCam           \
         -I$(top_srcdir)/src/bin/calaos_server/LuaScript       \
@@ -314,17 +315,25 @@ calaos_server_SOURCES = \
         IO/xPL/xPLLib/Schemas/SchemaControl.h           \
         IO/xPL/xPLLib/StringTools/StringTools.cpp       \
         IO/xPL/xPLLib/StringTools/StringTools.h         \
-        IO/Zibase/Zibase.cpp                            \
-        IO/Zibase/Zibase.h                              \
-        IO/Zibase/ZibaseTemp.cpp                        \
-        IO/Zibase/ZibaseTemp.h                          \
-        IO/Zibase/ZibaseAnalogIn.cpp                    \
-        IO/Zibase/ZibaseAnalogIn.h                      \
-        IO/Zibase/ZibaseDigitalIn.cpp                   \
-        IO/Zibase/ZibaseDigitalIn.h                     \
-        IO/Zibase/ZibaseDigitalOut.cpp                  \
-        IO/Zibase/ZibaseDigitalOut.h                    \
-        IOBase.cpp                                      \
+		IO/Zibase/Zibase.cpp                            \
+		IO/Zibase/Zibase.h                              \
+		IO/Zibase/ZibaseTemp.cpp                        \
+		IO/Zibase/ZibaseTemp.h                          \
+		IO/Zibase/ZibaseAnalogIn.cpp                    \
+		IO/Zibase/ZibaseAnalogIn.h                      \
+		IO/Zibase/ZibaseDigitalIn.cpp                   \
+		IO/Zibase/ZibaseDigitalIn.h                     \
+		IO/Zibase/ZibaseDigitalOut.cpp                  \
+		IO/Zibase/ZibaseDigitalOut.h                    \
+		IO/Zigbee/Zigbee.cpp                            \
+		IO/Zigbee/Zigbee.h                              \
+		IO/Zigbee/ZigbeeTemp.cpp                        \
+		IO/Zigbee/ZigbeeTemp.h                          \
+		IO/Zigbee/ZigbeeAnalogIn.cpp                    \
+		IO/Zigbee/ZigbeeAnalogIn.h                      \
+		IO/Zigbee/ZigbeeDigitalIn.cpp                   \
+		IO/Zigbee/ZigbeeDigitalIn.h                     \
+		IOBase.cpp                                      \
         IOBase.h                                        \
         IPCam/Axis.cpp                                  \
         IPCam/Axis.h                                    \
