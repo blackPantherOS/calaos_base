@@ -2,8 +2,9 @@
 #define __MQTT_CLIENT_H__
 
 #include <unordered_map>
-
+#include <mutex>
 #include <mosquittopp.h>
+#include "libuvw.h"
 #include "Params.h"
 #include "Utils.h"
 #include "IODoc.h"
@@ -33,9 +34,14 @@ public:
     void  setValueInt(const Params &params, int val);
 
 private:
+    std::shared_ptr<uvw::AsyncHandle> async;
+
     std::unordered_map<string, std::vector<sigc::slot<void>>> subscribeCb;
+    // Only used in main thread
     std::unordered_map<string, struct mosquitto_message*> messages;
+    std::list<struct mosquitto_message*> lastMessagesReceived;
     bool connected = false;
+    std::mutex mutex;
 };
 
 

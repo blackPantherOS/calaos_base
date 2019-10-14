@@ -26,6 +26,49 @@ MqttClient::MqttClient(const Params &p) : mosquittopp("calaos")
     if (p.Exists("keepalive"))
         Utils::from_string(p["keepalive"], keepalive);
 
+    // Initialize async object to use in mosquitto thread later
+    auto loop = uvw::Loop::getDefault();
+
+    async = loop->resource<uvw::AsyncHandle>();
+
+    async->on<uvw::AsyncEvent>([=](const auto &, auto &hndl)
+    {
+        cDebugDom("mqtt") << "Async event received";
+        // Main loop awake
+
+        mutex.lock();
+
+        // No message in list ?
+        if (!lastMessagesReceived.size())
+            return;
+
+        auto it = std::begin(lastMessagesReceived);
+        // Loop for all last messages received
+        while (it != std::end(lastMessagesReceived))
+        {
+            struct mosquitto_message *m = *it;
+            //If a message for this topic already exists, free it
+            if (messages.find(m->topic) != messages.end())
+            {
+                free(messages[m->topic]);
+            }
+            //Set or replace the message
+            messages[m->topic] = m;
+
+            cDebugDom("mqtt") << "pop front " << m->topic;
+
+            // Call all callback registered for this topic
+            for(auto cb : subscribeCb[m->topic])
+            {
+                cb();
+            }
+
+            it = lastMessagesReceived.erase(it);
+        }
+
+        mutex.unlock();
+    });
+
     cDebugDom("mqtt") << "Connecting to broker " << broker << ":" << port;
 
     int res = connect_async(broker.c_str(), port, keepalive);
@@ -81,7 +124,6 @@ void MqttClient::publishTopic(const string topic, const string payload)
 void MqttClient::on_connect(int rc)
 {
     cDebugDom("mqtt") << "Connected with code "  << rc;
-
     if (!rc)
     {
          connected = true;
@@ -106,22 +148,18 @@ void MqttClient::on_message(const struct mosquitto_message *message)
 
     struct mosquitto_message *m = (struct mosquitto_message*) calloc(sizeof(struct mosquitto_message), 1);
 
-    // First copu the message
+    // Take mutex
+    // First copy the message
+    mutex.lock();
     mosquitto_message_copy(m, message);
+    // Push message in list
+    lastMessagesReceived.push_back(m);
+    cDebugDom("mqtt") << "Pusb back " << m->topic;
+    // Release mutex
+    mutex.unlock();
 
-    // If a message for this topic exists, free it
-    if (messages.find(message->topic) != messages.end())
-    {
-        free(messages[message->topic]);
-    }
-    // Set or replace the message
-    messages[message->topic] = m;
-
-    // Call all callback registered for this topic
-    for(auto cb : subscribeCb[m->topic])
-    {
-        cb();
-    }
+    // Call async to wake up the mainloop
+    async->send();
 }
 
 void MqttClient::on_log(int level, const char *str)
